@@ -20,11 +20,13 @@ export async function embedDocuments(
 
     const parts: string[] = [];
     if (result.embedded > 0) parts.push(`${result.embedded} embedded`);
+    const alreadyEmbedded = result.found - result.total;
+    if (alreadyEmbedded > 0) parts.push(`${alreadyEmbedded} already embedded`);
     if (result.skipped > 0) parts.push(`${result.skipped} skipped`);
     if (result.failed > 0) parts.push(`${result.failed} failed`);
 
     spinner.stop(
-      `Doc embeddings: ${parts.join(', ')} (${result.total} total, ${result.durationMs}ms)`,
+      `Doc embeddings: ${parts.join(', ')} (${result.found} total, ${result.durationMs}ms)`,
     );
     return result;
   } catch (error) {

@@ -16,6 +16,7 @@ export interface InstructionBackfillRequestDto {
  * Response DTO for instruction backfill operations.
  */
 export interface InstructionBackfillResponseDto {
+  found: number;
   total: number;
   embedded: number;
   skipped: number;

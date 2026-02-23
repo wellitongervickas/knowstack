@@ -69,6 +69,7 @@ export class EmbeddingBackfillService {
     );
 
     const result: BackfillResponseDto = {
+      found: 0,
       total: 0,
       embedded: 0,
       skipped: 0,
@@ -80,11 +81,13 @@ export class EmbeddingBackfillService {
 
     // Get documents to process
     const projectId = request.projectId;
+    const allDocs = await this.documentRepository.findByProjectId(projectId);
+    result.found = allDocs.length;
+
     let documentsToProcess: { id: string; contentHash: string }[] = [];
 
     if (request.forceRegenerate) {
-      const docs = await this.documentRepository.findByProjectId(projectId);
-      documentsToProcess = docs.map((d) => ({ id: d.id, contentHash: d.contentHash }));
+      documentsToProcess = allDocs.map((d) => ({ id: d.id, contentHash: d.contentHash }));
     } else {
       documentsToProcess = await this.embeddingRepository.findDocumentsNeedingEmbedding(
         projectId,

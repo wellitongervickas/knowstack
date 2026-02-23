@@ -67,6 +67,7 @@ export class InstructionBackfillService {
     );
 
     const result: InstructionBackfillResponseDto = {
+      found: 0,
       total: 0,
       embedded: 0,
       skipped: 0,
@@ -101,6 +102,8 @@ export class InstructionBackfillService {
       seen.add(i.id);
       return true;
     });
+
+    result.found = uniqueInstructions.length;
 
     // Filter to those needing embedding (unless force regenerate)
     let toEmbed = uniqueInstructions;

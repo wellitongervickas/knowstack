@@ -15,17 +15,21 @@ export function printSummary(result: SetupResult): void {
   if (embeddings) {
     if (embeddings.documents) {
       const d = embeddings.documents;
-      lines.push(
-        `Doc embeddings: ${d.embedded} embedded, ${d.skipped} skipped` +
-          (d.failed > 0 ? `, ${d.failed} failed` : ''),
-      );
+      const dAlready = d.found - d.total;
+      const dParts = [`${d.embedded} embedded`];
+      if (dAlready > 0) dParts.push(`${dAlready} already embedded`);
+      if (d.skipped > 0) dParts.push(`${d.skipped} skipped`);
+      if (d.failed > 0) dParts.push(`${d.failed} failed`);
+      lines.push(`Doc embeddings: ${dParts.join(', ')} (${d.found} total)`);
     }
     if (embeddings.instructions) {
       const i = embeddings.instructions;
-      lines.push(
-        `Instruction embeddings: ${i.embedded} embedded, ${i.skipped} skipped` +
-          (i.failed > 0 ? `, ${i.failed} failed` : ''),
-      );
+      const iAlready = i.found - i.total;
+      const iParts = [`${i.embedded} embedded`];
+      if (iAlready > 0) iParts.push(`${iAlready} already embedded`);
+      if (i.skipped > 0) iParts.push(`${i.skipped} skipped`);
+      if (i.failed > 0) iParts.push(`${i.failed} failed`);
+      lines.push(`Instruction embeddings: ${iParts.join(', ')} (${i.found} total)`);
     }
   }
 

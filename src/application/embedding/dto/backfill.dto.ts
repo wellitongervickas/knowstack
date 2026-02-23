@@ -27,6 +27,7 @@ export class BackfillRequestDto {
  * Response DTO for backfill endpoint.
  */
 export interface BackfillResponseDto {
+  found: number;
   total: number;
   embedded: number;
   skipped: number;

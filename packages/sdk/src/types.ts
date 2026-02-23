@@ -40,6 +40,7 @@ export interface InstructionSeedResult {
 }
 
 export interface EmbedResult {
+  found: number;
   total: number;
   embedded: number;
   skipped: number;
