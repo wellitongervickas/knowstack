@@ -295,13 +295,6 @@ Constants are organized by scope:
 | `EMBEDDING_CLIENT_ERRORS.RATE_LIMITED` | `'RATE_LIMITED'` | Client rate limited |
 | `EMBEDDING_CLIENT_ERRORS.PROCESSING_FAILED` | `'PROCESSING_FAILED'` | Embedding processing failed |
 
-**`SEMANTIC_SEARCH_HEADERS`** -- Response headers for semantic search metadata:
-
-| Constant | Value | Description |
-|----------|-------|-------------|
-| `SEMANTIC_SEARCH_HEADERS.SEMANTIC_SEARCH` | `'X-Semantic-Search'` | Whether semantic search was used |
-| `SEMANTIC_SEARCH_HEADERS.SEMANTIC_DOCS` | `'X-Semantic-Search-Docs'` | Number of docs from semantic search |
-
 #### Internal Constants
 
 | Constant | Value | Description |

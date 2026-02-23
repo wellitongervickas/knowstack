@@ -51,7 +51,6 @@ curl -s -X POST http://localhost:3000/api/v1/mcp \
 
 **Symptoms:**
 
-- `X-Semantic-Search: false` in response headers
 - All documents returned instead of top-K
 
 **Causes:**
@@ -78,7 +77,6 @@ psql -c "SELECT * FROM pg_extension WHERE extname = 'vector';"
 
 **Symptoms:**
 
-- `X-Semantic-Search: true` but poor results
 - `fallbackUsed: true` in response
 
 **Causes:**

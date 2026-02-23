@@ -113,15 +113,3 @@ export const DEFAULT_PROVIDER_NAME = 'stub';
  * CLS key for storing retrieval metadata in request context.
  */
 export const RETRIEVAL_META_CLS_KEY = 'retrievalMeta';
-
-// ============= HTTP Headers =============
-
-/**
- * HTTP response headers for semantic search information.
- */
-export const SEMANTIC_SEARCH_HEADERS = {
-  /** Indicates whether semantic search was used (true/false) */
-  SEMANTIC_SEARCH: 'X-Semantic-Search',
-  /** Number of documents retrieved via semantic search */
-  SEMANTIC_DOCS: 'X-Semantic-Search-Docs',
-} as const;
