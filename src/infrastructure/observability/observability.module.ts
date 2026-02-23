@@ -8,14 +8,11 @@ import {
 } from '@/core/interfaces/services/observability.interface';
 import { StructuredLoggerService } from './services/structured-logger.service';
 import { MetricsService } from './services/metrics.service';
-import { MetricsController } from './controllers/metrics.controller';
-
 /**
  * Global observability module providing:
  * - RequestContextService for request ID and source tracking
  * - StructuredLoggerService for JSON logging
  * - MetricsService for Prometheus metrics
- * - MetricsController for /metrics endpoint
  *
  * Note: This module has no dependencies on presentation layer modules.
  * Auth context is provided via middleware, not module imports.
@@ -46,7 +43,6 @@ import { MetricsController } from './controllers/metrics.controller';
       useClass: NoOpErrorReporter,
     },
   ],
-  controllers: [MetricsController],
   exports: [
     RequestContextService,
     StructuredLoggerService,

@@ -46,9 +46,7 @@ Presentation → Application → Core ← Infrastructure
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
 │                        PRESENTATION LAYER                           │
-│  MCP Controller: POST/GET /mcp (Model Context Protocol)             │
-│  Health: GET /health                                                │
-│  Metrics: GET /metrics                                              │
+│  MCP Controller: POST/GET /api/v1/mcp (Model Context Protocol)      │
 │  Tenant resolution via ConfigTenantMiddleware (x-ks-org, x-ks-project)│
 └─────────────────────────────────────────────────────────────────────┘
                                   │
@@ -77,7 +75,7 @@ Presentation → Application → Core ← Infrastructure
 │  Cache: Redis 7 with ioredis                                        │
 │  AI: OpenAI + Stub providers (factory pattern)                      │
 │  MCP: MCP SDK server factory                                        │
-│  Observability: Structured logging, Prometheus metrics              │
+│  Observability: Structured logging                                  │
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -136,15 +134,14 @@ src/
 │   ├── embedding/          # Embedding provider implementations
 │   │   └── providers/      # OpenAI, Stub
 │   └── observability/      # Logging & metrics
-│       ├── services/       # StructuredLogger, MetricsService
-│       └── controllers/    # MetricsController (/metrics)
+│       └── services/       # StructuredLogger, MetricsService
 │
 ├── presentation/mcp/       # MCP presentation layer
-│   ├── mcp.controller.ts   # POST/GET/DELETE /mcp endpoints
+│   ├── mcp.controller.ts   # POST/GET/DELETE /api/v1/mcp endpoints
 │   └── mcp.module.ts       # MCP NestJS module
 │
 └── common/                 # Shared utilities
-    ├── decorators/         # @Tenant, @Public
+    ├── decorators/         # @Tenant
     ├── middleware/         # ConfigTenantMiddleware, RequestContextMiddleware
     ├── interceptors/       # LoggingInterceptor, SecurityHeadersInterceptor
     ├── filters/            # GlobalExceptionFilter
@@ -216,7 +213,7 @@ Cross-cutting concerns.
 
 **Put here:**
 
-- Decorators (@Tenant, @Public)
+- Decorators (@Tenant)
 - Middleware (ConfigTenantMiddleware, RequestContextMiddleware)
 - Interceptors (LoggingInterceptor)
 - Filters (GlobalExceptionFilter)
@@ -307,7 +304,7 @@ No authentication guards, JWT tokens, or API keys are used. The MCP client provi
 ### MCP Request
 
 ```
-HTTP Request (POST/GET /mcp with x-ks-org, x-ks-project headers)
+HTTP Request (POST/GET /api/v1/mcp with x-ks-org, x-ks-project headers)
     ↓
 [CLS Middleware] - AsyncLocalStorage initialized
     ↓
@@ -373,18 +370,16 @@ See [Semantic Retrieval](../concepts/semantic-retrieval.md) for detailed archite
 
 ## API Surface
 
-### HTTP Endpoints
+### HTTP Endpoint
 
 ```
-GET    /metrics                 Prometheus metrics
-POST   /mcp                     MCP protocol handler
-GET    /mcp                     MCP protocol handler (read operations)
-DELETE /mcp                     Returns 405 (stateless, no sessions)
+POST /api/v1/mcp                MCP protocol handler (JSON-RPC)
+GET  /api/v1/mcp                MCP protocol handler (read operations)
 ```
 
 ### MCP Tools
 
-All business operations are exposed as MCP tools via the `/mcp` endpoint:
+All business operations are exposed as MCP tools via the `/api/v1/mcp` endpoint:
 
 - **knowstack.query** - AI-powered documentation query
 - **knowstack.save_documents** - Save/update documents
@@ -448,7 +443,7 @@ services:
 | Service Interfaces    | 5+    |
 | Custom Exceptions     | 15    |
 | MCP Tools             | 23    |
-| HTTP Endpoints        | 2     |
+| HTTP Endpoints        | 1     |
 | Unit Tests            | 100+  |
 
 ---

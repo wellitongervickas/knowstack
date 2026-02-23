@@ -39,8 +39,12 @@ echo $EMBEDDING_ENABLED
 echo $EMBEDDING_DEFAULT_PROVIDER
 echo $OPENAI_API_KEY | head -c 10  # Don't expose full key
 
-# Verify health endpoint
-curl http://localhost:3000/api/v1/health
+# Verify via MCP dry-run backfill (checks embedding config)
+curl -s -X POST http://localhost:3000/api/v1/mcp \
+  -H "x-ks-org: YOUR_ORG" \
+  -H "x-ks-project: YOUR_PROJECT" \
+  -H "Content-Type: application/json" \
+  -d '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"knowstack.backfill_embeddings","arguments":{"dryRun":true}}}'
 ```
 
 ### Semantic Search Not Used
@@ -94,7 +98,7 @@ WARN: Semantic search failed, falling back to all-docs
 
 **Symptoms:**
 
-- Health check shows `pgvector: unavailable`
+- Backfill dry-run fails with `PGVECTOR_NOT_INSTALLED`
 - Error: `PGVECTOR_NOT_INSTALLED`
 
 **Resolution:**
@@ -162,11 +166,15 @@ SELECT pg_relation_size('document_embeddings_embedding_idx');
 ### Test Embedding Provider
 
 ```bash
-# Health check endpoint
-curl http://localhost:3000/api/v1/health | jq '.services.pgvector'
+# Verify pgvector via SQL
+psql -c "SELECT * FROM pg_extension WHERE extname = 'vector';"
 
-# Manual embedding test (with stub provider)
-# The stub provider always succeeds
+# Test embedding via MCP dry-run backfill
+curl -s -X POST http://localhost:3000/api/v1/mcp \
+  -H "x-ks-org: YOUR_ORG" \
+  -H "x-ks-project: YOUR_PROJECT" \
+  -H "Content-Type: application/json" \
+  -d '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"knowstack.backfill_embeddings","arguments":{"dryRun":true}}}'
 ```
 
 ### Check Response Headers

@@ -59,29 +59,9 @@ All logs are emitted in JSON format with consistent fields:
 - Request completion (with metrics)
 - Errors (with stack trace in logs only, never to clients)
 
-### Prometheus Metrics
+### Metrics (Internal Only)
 
-Metrics are exposed at `GET /metrics` (unauthenticated).
-
-**Counters:**
-
-```
-# Total queries processed
-knowstack_queries_total{provider="openai",source="api"} 42
-
-# Total query errors
-knowstack_query_errors_total{provider="openai",source="api"} 3
-```
-
-**Histogram (latency):**
-
-```
-knowstack_query_latency_ms_bucket{provider="openai",source="api",le="100"} 5
-knowstack_query_latency_ms_bucket{provider="openai",source="api",le="500"} 35
-knowstack_query_latency_ms_bucket{provider="openai",source="api",le="+Inf"} 42
-knowstack_query_latency_ms_sum{provider="openai",source="api"} 8750
-knowstack_query_latency_ms_count{provider="openai",source="api"} 42
-```
+Metrics are collected internally via `IMetricsService` but are not exposed via an HTTP endpoint — all operations go through MCP.
 
 ### Error Responses
 
@@ -121,17 +101,15 @@ src/
 │   └── observability.interface.ts          # IStructuredLogger, IMetricsService
 └── infrastructure/observability/
     ├── observability.module.ts
-    ├── services/
-    │   ├── structured-logger.service.ts
-    │   └── metrics.service.ts
-    └── controllers/
-        └── metrics.controller.ts
+    └── services/
+        ├── structured-logger.service.ts
+        └── metrics.service.ts
 ```
 
 ### Request Lifecycle
 
 ```
-HTTP Request (POST/GET /mcp)
+HTTP Request (POST/GET /api/v1/mcp)
     ↓
 [CLS Middleware] - AsyncLocalStorage initialized
     ↓
@@ -152,7 +130,7 @@ HTTP Response (MCP protocol / SSE)
 
 ```bash
 # MCP request with trace ID
-curl -X POST http://localhost:3000/mcp \
+curl -X POST http://localhost:3000/api/v1/mcp \
   -H "x-ks-org: my-org" \
   -H "x-ks-project: my-project" \
   -H "x-request-id: mcp-trace-12345" \
@@ -164,17 +142,6 @@ Logs will show:
 
 ```json
 {"requestId": "mcp-trace-12345", "source": "mcp", ...}
-```
-
-### Scraping Metrics
-
-```bash
-# Prometheus config
-scrape_configs:
-  - job_name: 'knowstack'
-    static_configs:
-      - targets: ['localhost:3000']
-    metrics_path: '/metrics'
 ```
 
 ## Future Enhancements (Scaffolded)

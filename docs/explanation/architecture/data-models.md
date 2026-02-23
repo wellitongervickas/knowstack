@@ -179,7 +179,7 @@ AI instruction configuration for projects.
 | `type`           | enum          | AGENT, COMMAND, MEMORY, SKILL, TEMPLATE      |
 | `visibility`     | enum          | PUBLIC, ORGANIZATION, PRIVATE                |
 | `content`        | text          | Instruction content (markdown)               |
-| `description`    | string?       | Short description                            |
+| `description`    | string        | Short description                            |
 | `metadata`       | JSON          | Extensible metadata (default: {})            |
 | `createdAt`      | DateTime      | Creation date                                |
 | `updatedAt`      | DateTime      | Last update                                  |

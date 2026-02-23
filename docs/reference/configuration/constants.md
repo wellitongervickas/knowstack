@@ -314,7 +314,7 @@ Constants are organized by scope:
 | Constant | Value | Description |
 |----------|-------|-------------|
 | `MAX_REQUEST_ID_LENGTH` | `64` | Maximum request ID length |
-| `UUID_V4_PATTERN` | `/^[0-9a-f]{8}-..$/i` | UUID v4 validation regex |
+| `UUID_V4_PATTERN` | `/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i` | UUID v4 validation regex |
 
 ## Usage
 

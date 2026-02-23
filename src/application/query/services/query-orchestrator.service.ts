@@ -190,7 +190,6 @@ export class QueryOrchestratorService {
 
   /**
    * Store retrieval metadata in CLS for header injection.
-   * Used by SemanticSearchHeaderInterceptor to set X-Semantic-Search header.
    */
   private storeRetrievalMeta(retrievalMeta: RetrievalMetadata): void {
     this.cls.set(RETRIEVAL_META_CLS_KEY, retrievalMeta);

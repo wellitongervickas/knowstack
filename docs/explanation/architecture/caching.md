@@ -73,17 +73,9 @@ Cache is invalidated when documents change:
     All cached queries removed
 ```
 
-### Prometheus Metrics
+### Cache Metrics
 
-Cache metrics are exposed at `GET /metrics`:
-
-```
-# Cache hits
-knowstack_query_cache_hits_total{projectId="proj_xxx"} 42
-
-# Cache misses
-knowstack_query_cache_misses_total{projectId="proj_xxx"} 10
-```
+Cache hit/miss counts are tracked internally via `IMetricsService` for logging and debugging.
 
 ## Architecture
 

@@ -74,7 +74,12 @@ Call the `backfill_embeddings` tool:
 Check embedding statistics via MCP or a direct cURL call:
 
 ```bash
-curl -X GET "http://localhost:3000/api/v1/health" | jq '.services.pgvector'
+# Verify via MCP dry-run (backfill_embeddings with dryRun: true)
+curl -s -X POST "http://localhost:3000/api/v1/mcp" \
+  -H "x-ks-org: YOUR_ORG" \
+  -H "x-ks-project: YOUR_PROJECT" \
+  -H "Content-Type: application/json" \
+  -d '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"knowstack.backfill_embeddings","arguments":{"dryRun":true}}}'
 ```
 
 Expected response from stats:
