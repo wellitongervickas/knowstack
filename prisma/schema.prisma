@@ -1,0 +1,179 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============= ORGANIZATION =============
+model Organization {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  projects     Project[]
+  instructions Instruction[]
+
+  @@map("organizations")
+}
+
+// ============= PROJECT =============
+model Project {
+  id             String   @id @default(cuid())
+  organizationId String
+  name           String
+  slug           String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  documents    Document[]
+  instructions Instruction[]
+
+  @@unique([organizationId, slug])
+  @@index([organizationId])
+  @@map("projects")
+}
+
+// ============= DOCUMENT =============
+model Document {
+  id          String     @id @default(cuid())
+  projectId   String
+  title       String
+  content     String     @db.Text
+  sourceType  SourceType @default(MANUAL)
+  sourceUrl   String?
+  contentHash String
+  metadata    Json       @default("{}")
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  project   Project            @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  embedding DocumentEmbedding?
+
+  @@unique([projectId, contentHash])
+  @@index([projectId])
+  @@index([contentHash])
+  @@index([sourceUrl])
+  @@map("documents")
+}
+
+// ============= DOCUMENT EMBEDDING =============
+model DocumentEmbedding {
+  id          String                      @id @default(cuid())
+  documentId  String                      @unique
+  projectId   String
+  embedding   Unsupported("vector(1536)")
+  contentHash String
+  model       String                      @default("text-embedding-3-small")
+  inputTokens Int                         @default(0)
+  createdAt   DateTime                    @default(now())
+  updatedAt   DateTime                    @updatedAt
+
+  document Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+  @@index([contentHash])
+  @@map("document_embeddings")
+}
+
+enum SourceType {
+  MANUAL
+  URL
+}
+
+// ============= INSTRUCTION =============
+model Instruction {
+  id             String                @id @default(cuid())
+  name           String
+  type           InstructionType
+  visibility     InstructionVisibility @default(PRIVATE)
+  description    String
+  content        String                @db.Text
+  metadata       Json                  @default("{}")
+  projectId      String?
+  organizationId String?
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @updatedAt
+
+  project      Project?                @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  organization Organization?            @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  embedding    InstructionEmbedding?
+
+  // Uniqueness enforced by partial indexes in migration (null columns prevent Prisma @@unique)
+  @@index([projectId])
+  @@index([organizationId])
+  @@index([organizationId, type])
+  @@index([type, visibility])
+  @@map("instructions")
+}
+
+// ============= INSTRUCTION EMBEDDING =============
+model InstructionEmbedding {
+  id             String                      @id @default(cuid())
+  instructionId  String                      @unique
+  projectId      String?
+  organizationId String?
+  embedding      Unsupported("vector(1536)")
+  contentHash    String
+  model          String                      @default("text-embedding-3-small")
+  inputTokens    Int                         @default(0)
+  createdAt      DateTime                    @default(now())
+  updatedAt      DateTime                    @updatedAt
+
+  instruction Instruction @relation(fields: [instructionId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+  @@index([organizationId])
+  @@index([contentHash])
+  @@map("instruction_embeddings")
+}
+
+enum InstructionType {
+  AGENT
+  COMMAND
+  MEMORY
+  SKILL
+  TEMPLATE
+}
+
+enum InstructionVisibility {
+  PUBLIC
+  ORGANIZATION
+  PRIVATE
+}
+
+// ============= AUDIT LOG =============
+// Simplified audit trail for observability (no user references)
+model AuditLog {
+  id        String   @id @default(cuid())
+  timestamp DateTime @default(now())
+
+  // Action (what)
+  action   String // Event type
+  category String // DOCUMENT, INSTRUCTION, QUERY, SYSTEM
+
+  // Resource (on what)
+  resourceType String? // Document, Instruction
+  resourceId   String?
+
+  // Context
+  organizationId String?
+  projectId      String?
+  requestId      String?
+  source         String? // mcp
+
+  // Details
+  metadata Json? @default("{}")
+
+  @@index([organizationId, timestamp])
+  @@index([organizationId, category, timestamp])
+  @@index([timestamp])
+  @@map("audit_logs")
+}
