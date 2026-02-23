@@ -41,6 +41,11 @@ export interface IOrganizationRepository {
   update(id: string, data: UpdateOrganizationInput): Promise<Organization>;
 
   /**
+   * Find all organizations.
+   */
+  findAll(): Promise<Organization[]>;
+
+  /**
    * Delete an organization.
    */
   delete(id: string): Promise<void>;

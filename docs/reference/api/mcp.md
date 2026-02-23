@@ -1250,6 +1250,7 @@ Desktop MCP clients typically use a JSON config file. Refer to your app's docume
 
 ## See Also
 
+- [Admin MCP Reference](admin-mcp.md) - Organization and project management tools (no tenant headers)
 - [API Reference](index.md) - Endpoint overview
 - [Common Headers](../integrations/common-headers.md) - Request/response headers
 - [Error Handling](../troubleshooting/errors.md) - Error codes and handling

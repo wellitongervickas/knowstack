@@ -1,63 +1,70 @@
-import { PrismaClient } from '@prisma/client';
 import {
   intro,
   outro,
-  logError,
   logWarning,
   logStep,
+  askText,
   askConfirm,
   askMultiSelect,
-} from '@/scripts/setup/prompts';
-import { DEFAULT_MCP_URL, CONFIG_FILE_NAME } from '@/scripts/setup/constants';
-import { loadProfiles, selectProfile, saveProfiles, parseProfileArg } from '@/scripts/setup/config';
-import { checkMcpHealth } from '@/scripts/setup/mcp-client';
-import { createOrganization } from '@/scripts/setup/steps/create-organization';
-import { createProject } from '@/scripts/setup/steps/create-project';
-import { ingestDocuments } from '@/scripts/setup/steps/ingest-documents';
-import { seedInstructions } from '@/scripts/setup/steps/seed-instructions';
-import { embedDocuments } from '@/scripts/setup/steps/embed-documents';
-import { embedInstructions } from '@/scripts/setup/steps/embed-instructions';
-import { printSummary } from '@/scripts/setup/steps/print-summary';
-import { SetupResult } from '@/scripts/setup/types';
-import type { ContextProjectConfig } from '@/core/interfaces/config/knowstack-config.interface';
+} from './prompts';
+import { DEFAULT_MCP_URL, CONFIG_FILE_NAME } from './constants';
+import { loadProfiles, selectProfile, saveProfiles } from './config';
+import { checkMcpHealth } from './mcp-client';
+import { createOrganization } from './steps/create-organization';
+import { createProject } from './steps/create-project';
+import { ingestDocuments } from './steps/ingest-documents';
+import { seedInstructions } from './steps/seed-instructions';
+import { embedDocuments } from './steps/embed-documents';
+import { embedInstructions } from './steps/embed-instructions';
+import { printSummary } from './steps/print-summary';
+import { ContextProjectConfig, SetupResult } from './types';
+import { callMcpTool } from './mcp-client';
 
-async function main(): Promise<void> {
+export async function main(opts: { profile?: string }): Promise<void> {
   intro('KnowStack Setup');
 
   // 1. Load profiles and select one
   const profiles = loadProfiles();
-  const profileArg = parseProfileArg();
-  const { name: profileName, config } = await selectProfile(profiles, profileArg);
+  const { name: profileName, config } = await selectProfile(profiles, opts.profile);
 
   logStep(`Profile: ${profileName}`);
 
-  // 2. Use saved MCP URL or default to localhost
-  const mcpUrl = config.mcpUrl ?? DEFAULT_MCP_URL;
+  // 2. Prompt for MCP URL (use saved or prompt)
+  const defaultUrl = config.mcpUrl ?? DEFAULT_MCP_URL;
+  const mcpUrl = await askText('MCP server URL', {
+    defaultValue: defaultUrl,
+    placeholder: defaultUrl,
+  });
 
-  // 3. Bootstrap org/project via PrismaClient
-  const prisma = new PrismaClient();
-
-  let org: { id: string; name: string; slug: string };
-  let project: { id: string; name: string; slug: string };
-  let orgProjects: { slug: string; name: string }[] = [];
-
-  try {
-    await prisma.$connect();
-    org = await createOrganization(prisma, config);
-    project = await createProject(prisma, org.id, config);
-
-    // Fetch other projects in the org for context projects prompt
-    const allProjects = await prisma.project.findMany({
-      where: { organizationId: org.id },
-      select: { slug: true, name: true },
-      orderBy: { name: 'asc' },
-    });
-    orgProjects = allProjects.filter((p) => p.slug !== project.slug);
-  } finally {
-    await prisma.$disconnect();
+  // 3. Check MCP server health early
+  const serverUp = await checkMcpHealth(mcpUrl);
+  if (!serverUp) {
+    logWarning('MCP server not reachable at ' + mcpUrl);
+    logWarning('Start your KnowStack server first, then re-run: npx @knowstack/sdk --init');
+    return;
   }
 
-  // 4. Prompt for context projects (if not already configured)
+  // 4. Create/select organization via admin MCP
+  const org = await createOrganization(mcpUrl, config);
+
+  // 5. Create/select project via admin MCP
+  const project = await createProject(mcpUrl, org.slug, config);
+
+  // 6. Fetch other projects in the org for context projects prompt
+  let orgProjects: { slug: string; name: string }[] = [];
+  try {
+    const adminUrl = mcpUrl.replace(/\/?$/, '/admin');
+    const allProjects = (await callMcpTool(adminUrl, {}, 'knowstack.list_projects', {
+      organizationSlug: org.slug,
+    })) as unknown as { slug: string; name: string }[];
+    orgProjects = Array.isArray(allProjects)
+      ? allProjects.filter((p) => p.slug !== project.slug)
+      : [];
+  } catch {
+    // Non-critical — skip context projects
+  }
+
+  // 7. Prompt for context projects (if not already configured)
   let contextProjects = config.contextProjects;
 
   if (!contextProjects && orgProjects.length > 0) {
@@ -68,7 +75,7 @@ async function main(): Promise<void> {
     }
   }
 
-  // 5. Save profile immediately (org/project now exist in DB)
+  // 8. Save profile immediately
   const updatedConfig = {
     mcpUrl,
     orgSlug: org.slug,
@@ -80,25 +87,18 @@ async function main(): Promise<void> {
   saveProfiles(profiles);
   logStep(`Config saved to ${CONFIG_FILE_NAME}`);
 
-  // 6. Check MCP server health
+  // 9. Build tenant headers for content operations
   const headers = buildHeaders(org.slug, project.slug, contextProjects);
 
-  const serverUp = await checkMcpHealth(mcpUrl);
-  if (!serverUp) {
-    logWarning('MCP server not reachable. Start with: pnpm start:dev');
-    logWarning('Then re-run: pnpm setup:seed (config saved, press Enter through prompts)');
-    return;
-  }
-
-  // 7. Content operations via MCP
+  // 10. Content operations via MCP
   const documents = await ingestDocuments(mcpUrl, headers, updatedConfig);
   const instructions = await seedInstructions(mcpUrl, headers);
 
-  // 8. Generate embeddings (non-blocking)
+  // 11. Generate embeddings (non-blocking)
   const docEmbeddings = await embedDocuments(mcpUrl, headers);
   const instrEmbeddings = await embedInstructions(mcpUrl, headers);
 
-  // 9. Save final config (docsDir may have changed during prompt)
+  // 12. Save final config (docsDir may have changed during prompt)
   profiles[profileName] = { ...updatedConfig, docsDir: documents.docsDir };
   saveProfiles(profiles);
 
@@ -178,8 +178,3 @@ function buildHeaders(
 
   return headers;
 }
-
-main().catch((error) => {
-  logError(error instanceof Error ? error.message : String(error));
-  process.exit(1);
-});

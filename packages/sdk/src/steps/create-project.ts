@@ -1,8 +1,7 @@
-import { PrismaClient } from '@prisma/client';
-import { askText, askSelect, logStep } from '@/scripts/setup/prompts';
-import { DEFAULT_PROJECT_NAME, DEFAULT_PROJECT_SLUG } from '@/scripts/setup/constants';
-import { slugify } from '@/scripts/setup/utils';
-import { SetupConfig } from '@/scripts/setup/types';
+import { askText, askSelect, logStep } from '../prompts';
+import { slugify } from '../utils';
+import { callMcpTool } from '../mcp-client';
+import { SetupConfig } from '../types';
 
 interface ProjectResult {
   id: string;
@@ -10,17 +9,27 @@ interface ProjectResult {
   slug: string;
 }
 
+/**
+ * Derive the admin MCP URL from the base MCP URL.
+ */
+function getAdminUrl(mcpUrl: string): string {
+  return mcpUrl.replace(/\/?$/, '/admin');
+}
+
 export async function createProject(
-  prisma: PrismaClient,
-  organizationId: string,
+  mcpUrl: string,
+  orgSlug: string,
   config: SetupConfig,
 ): Promise<ProjectResult> {
-  const existing = await prisma.project.findMany({
-    where: { organizationId },
-    orderBy: { createdAt: 'desc' },
-  });
+  const adminUrl = getAdminUrl(mcpUrl);
 
-  if (existing.length > 0) {
+  // Fetch existing projects via admin MCP
+  const existingResponse = await callMcpTool(adminUrl, {}, 'knowstack.list_projects', {
+    organizationSlug: orgSlug,
+  });
+  const existing = existingResponse as unknown as ProjectResult[];
+
+  if (Array.isArray(existing) && existing.length > 0) {
     // If config has a slug, try to auto-select the matching project
     if (config.projectSlug) {
       const match = existing.find((p) => p.slug === config.projectSlug);
@@ -45,13 +54,11 @@ export async function createProject(
     }
   }
 
-  const defaultName = config.projectSlug ? undefined : DEFAULT_PROJECT_NAME;
   const name = await askText('Project name', {
-    defaultValue: defaultName ?? DEFAULT_PROJECT_NAME,
-    placeholder: defaultName ?? DEFAULT_PROJECT_NAME,
+    placeholder: 'My Project',
   });
 
-  const suggestedSlug = config.projectSlug ?? (slugify(name) || DEFAULT_PROJECT_SLUG);
+  const suggestedSlug = config.projectSlug ?? slugify(name);
   const slug = await askText('Project slug', {
     defaultValue: suggestedSlug,
     placeholder: suggestedSlug,
@@ -62,11 +69,23 @@ export async function createProject(
     },
   });
 
-  const project = await prisma.project.upsert({
-    where: { organizationId_slug: { organizationId, slug } },
-    create: { organizationId, name, slug },
-    update: { name },
-  });
+  // Try to get existing project by slug first (upsert-like behavior)
+  try {
+    const existingProject = (await callMcpTool(adminUrl, {}, 'knowstack.get_project', {
+      organizationSlug: orgSlug,
+      slug,
+    })) as unknown as ProjectResult;
+    logStep(`Project ready: ${existingProject.name} (${existingProject.slug})`);
+    return { id: existingProject.id, name: existingProject.name, slug: existingProject.slug };
+  } catch {
+    // Not found — create new
+  }
+
+  const project = (await callMcpTool(adminUrl, {}, 'knowstack.create_project', {
+    organizationSlug: orgSlug,
+    name,
+    slug,
+  })) as unknown as ProjectResult;
 
   logStep(`Project ready: ${project.name} (${project.slug})`);
   return { id: project.id, name: project.name, slug: project.slug };

@@ -98,3 +98,7 @@ docker-compose.override.yml
 # Local development
 .local/
 knowstack.config.ts
+knowstack.config.json
+
+# npm auth tokens
+.npmrc

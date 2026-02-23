@@ -47,6 +47,13 @@ export class OrganizationRepository implements IOrganizationRepository {
     return count > 0;
   }
 
+  async findAll(): Promise<Organization[]> {
+    const orgs = await this.prisma.organization.findMany({
+      orderBy: { createdAt: 'desc' },
+    });
+    return orgs.map((org) => this.mapToOrganization(org));
+  }
+
   async create(data: CreateOrganizationInput): Promise<Organization> {
     const org = await this.prisma.organization.create({
       data: {

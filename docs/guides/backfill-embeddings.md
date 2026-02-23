@@ -128,7 +128,7 @@ Instructions (agents, commands, skills, templates, memory) also support vector e
 
 Optional parameters: `type` (filter by instruction type), `force` (regenerate all).
 
-**Note:** The setup script (`pnpm setup:seed`) automatically runs instruction backfill after seeding.
+**Note:** The SDK CLI (`npx @knowstack/sdk --init`) automatically runs instruction backfill after seeding.
 
 ## Step 5: Test Semantic Search
 

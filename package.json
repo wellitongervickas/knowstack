@@ -4,11 +4,11 @@
   "description": "Multi-tenant developer documentation platform API",
   "repository": {
     "type": "git",
-    "url": "https://github.com/knowstack-dev/knowstack.git"
+    "url": "https://github.com/wellitongervickas/knowstack.git"
   },
-  "homepage": "https://github.com/knowstack-dev/knowstack#readme",
+  "homepage": "https://github.com/wellitongervickas/knowstack#readme",
   "bugs": {
-    "url": "https://github.com/knowstack-dev/knowstack/issues"
+    "url": "https://github.com/wellitongervickas/knowstack/issues"
   },
   "main": "dist/main.js",
   "scripts": {
@@ -18,13 +18,14 @@
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
-    "format": "prettier --write \"src/**/*.ts\" \"scripts/**/*.ts\"",
-    "format:check": "prettier --check \"src/**/*.ts\" \"scripts/**/*.ts\"",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "format:check": "prettier --check \"src/**/*.ts\"",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:cov": "vitest run --coverage",
     "typecheck": "tsc --noEmit",
-    "setup:seed": "ts-node -r tsconfig-paths/register --transpile-only scripts/setup/index.ts"
+    "sdk:build": "pnpm --filter @knowstack/sdk build",
+    "sdk:release": "pnpm --filter @knowstack/sdk release"
   },
   "keywords": [
     "nestjs",

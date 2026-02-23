@@ -58,6 +58,16 @@ export const MCP_TOOL_QUERY = 'knowstack.query';
 export const MCP_TOOL_BACKFILL_EMBEDDINGS = 'knowstack.backfill_embeddings';
 export const MCP_TOOL_BACKFILL_INSTRUCTIONS = 'knowstack.backfill_instructions';
 
+// Admin — Organizations
+export const MCP_TOOL_CREATE_ORGANIZATION = 'knowstack.create_organization';
+export const MCP_TOOL_GET_ORGANIZATION = 'knowstack.get_organization';
+export const MCP_TOOL_LIST_ORGANIZATIONS = 'knowstack.list_organizations';
+
+// Admin — Projects
+export const MCP_TOOL_CREATE_PROJECT = 'knowstack.create_project';
+export const MCP_TOOL_GET_PROJECT = 'knowstack.get_project';
+export const MCP_TOOL_LIST_PROJECTS = 'knowstack.list_projects';
+
 // =============================================================================
 // MCP TOOL DESCRIPTIONS
 // =============================================================================
@@ -127,10 +137,33 @@ export const MCP_TOOL_BACKFILL_EMBEDDINGS_DESCRIPTION =
 export const MCP_TOOL_BACKFILL_INSTRUCTIONS_DESCRIPTION =
   'Backfill embeddings for instructions. Generates vector embeddings for instructions that are missing or have stale embeddings. Supports dry-run for cost estimation.';
 
+// Admin — Organizations
+export const MCP_TOOL_CREATE_ORGANIZATION_DESCRIPTION =
+  'Create a new organization. Requires `name` and `slug`. Slug must be unique, lowercase, and may contain letters, numbers, and hyphens.';
+
+export const MCP_TOOL_GET_ORGANIZATION_DESCRIPTION =
+  'Get an organization by slug. Returns organization details including ID, name, and project count. Use to check if an organization exists and resolve its ID.';
+
+export const MCP_TOOL_LIST_ORGANIZATIONS_DESCRIPTION =
+  'List all organizations. Returns all organizations ordered by creation date (newest first).';
+
+// Admin — Projects
+export const MCP_TOOL_CREATE_PROJECT_DESCRIPTION =
+  'Create a new project within an organization. Requires `organizationSlug`, `name`, and `slug`. Project slug must be unique within the organization.';
+
+export const MCP_TOOL_GET_PROJECT_DESCRIPTION =
+  'Get a project by organization slug and project slug. Returns project details including ID. Use to check if a project exists.';
+
+export const MCP_TOOL_LIST_PROJECTS_DESCRIPTION =
+  'List all projects in an organization. Requires `organizationSlug`.';
+
 // =============================================================================
 // MCP ERROR MESSAGES
 // =============================================================================
 
 export const MCP_ERROR_MESSAGES = {
   UNEXPECTED_ERROR: 'An unexpected error occurred',
+  ORGANIZATION_NOT_FOUND: 'Organization not found',
+  PROJECT_NOT_FOUND: 'Project not found',
+  SLUG_ALREADY_TAKEN: 'Slug is already taken',
 } as const;

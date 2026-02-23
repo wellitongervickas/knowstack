@@ -20,13 +20,14 @@ Step-by-step learning guides for beginners.
 
 Task-oriented how-to guides for practitioners.
 
+- [SDK Setup](guides/sdk-setup.md) - Set up a project using the SDK CLI
 - [Backfill Embeddings](guides/backfill-embeddings.md) - Add embeddings to existing documents
 
 ### [Reference](reference/index.md)
 
 Technical specifications and API details.
 
-- [API Reference](reference/api/index.md) - MCP tools
+- [API Reference](reference/api/index.md) - MCP and Admin MCP tools
 - [Configuration](reference/configuration/index.md) - Environment variables and constants
 - [Troubleshooting](reference/troubleshooting/index.md) - Error codes and debugging
 

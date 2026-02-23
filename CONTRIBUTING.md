@@ -10,13 +10,13 @@ This project follows the [Contributor Covenant Code of Conduct](CODE_OF_CONDUCT.
 
 ### Reporting Bugs
 
-- Use the [Bug Report](https://github.com/knowstack-dev/knowstack/issues/new?template=bug_report.yml) issue template
+- Use the [Bug Report](https://github.com/wellitongervickas/knowstack/issues/new?template=bug_report.yml) issue template
 - Include steps to reproduce, expected vs actual behavior, and environment details
 - Check existing issues first to avoid duplicates
 
 ### Suggesting Features
 
-- Use the [Feature Request](https://github.com/knowstack-dev/knowstack/issues/new?template=feature_request.yml) issue template
+- Use the [Feature Request](https://github.com/wellitongervickas/knowstack/issues/new?template=feature_request.yml) issue template
 - Describe the problem you're solving and your proposed solution
 - Consider alternatives and trade-offs
 
@@ -39,13 +39,13 @@ See [docs/contributing/setup.md](docs/contributing/setup.md) for full setup inst
 Quick version:
 
 ```bash
-git clone https://github.com/knowstack-dev/knowstack.git
+git clone https://github.com/wellitongervickas/knowstack.git
 cd knowstack
 pnpm install
 docker-compose up -d
 cp .env.example .env
 pnpm prisma generate && pnpm prisma migrate dev
-pnpm setup:seed
+npx @knowstack/sdk --init
 pnpm start:dev
 ```
 

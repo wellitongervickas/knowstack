@@ -1,13 +1,13 @@
-import { createSpinner } from '@/scripts/setup/prompts';
+import { createSpinner } from '../prompts';
 import {
   DEFAULT_AGENTS_DIR,
   DEFAULT_SKILLS_DIR,
   DEFAULT_COMMANDS_DIR,
   DEFAULT_TEMPLATES_DIR,
-} from '@/scripts/setup/constants';
-import { loadMarkdownFiles } from '@/scripts/setup/markdown-loader';
-import { callMcpTool } from '@/scripts/setup/mcp-client';
-import { InstructionSeedResult } from '@/scripts/setup/types';
+} from '../constants';
+import { loadMarkdownFiles } from '../markdown-loader';
+import { callMcpTool } from '../mcp-client';
+import { InstructionSeedResult } from '../types';
 
 interface InstructionDir {
   dir: string;

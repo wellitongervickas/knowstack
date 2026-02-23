@@ -12,6 +12,7 @@ Reusable checklists and review templates for KnowStack. These are seeded as PUBL
 | [commit-review](commit-review.md) | Commit message review guidelines |
 | [dependency-check](dependency-check.md) | Dependency review and update checklist |
 | [refactor-check](refactor-check.md) | Refactoring safety checklist |
+| [sdk-release](sdk-release.md) | Build and publish @knowstack/sdk to npm |
 
 ## How Commands Work
 

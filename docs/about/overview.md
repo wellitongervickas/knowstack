@@ -19,7 +19,7 @@ KnowStack connects your team's documentation to AI-powered query interfaces. Ins
 
 ### How It Works
 
-1. **Seed documentation** — Run `pnpm setup:seed` to create an org/project and ingest markdown files. KnowStack stores and indexes the content.
+1. **Seed documentation** — Run `npx @knowstack/sdk --init` to create an org/project and ingest markdown files. KnowStack stores and indexes the content.
 2. **Connect your tools** — Use MCP headers (`x-ks-org`, `x-ks-project`) to connect IDEs, AI assistants, or custom integrations.
 3. **Query with context** — Ask questions from your editor. KnowStack retrieves relevant documents and returns AI-generated answers grounded in your team's knowledge.
 

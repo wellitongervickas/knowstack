@@ -27,7 +27,7 @@ A self-hostable platform that connects development teams to their technical docu
 ### 1. Clone and Install
 
 ```bash
-git clone https://github.com/knowstack-dev/knowstack.git
+git clone https://github.com/wellitongervickas/knowstack.git
 cd knowstack
 pnpm install
 cp .env.example .env
@@ -56,13 +56,13 @@ pnpm prisma migrate dev
 
 ### 3. Seed Data
 
-The interactive wizard creates your organization, project, ingests documentation, and seeds AI instructions. It prints MCP connection config at the end.
+The SDK CLI creates your organization, project, ingests documentation, and seeds AI instructions. It works from any directory and prints MCP connection config at the end.
 
 ```bash
-pnpm setup:seed
+npx @knowstack/sdk --init
 ```
 
-> **Note:** Requires Node.js and pnpm locally, even when using Docker (Option A).
+See the [SDK Setup Guide](docs/guides/sdk-setup.md) for full options including named profiles.
 
 ### 4. Start and Connect
 
@@ -74,7 +74,7 @@ pnpm setup:seed
 pnpm start:dev
 ```
 
-Use the MCP config printed by the setup wizard to connect your IDE. See [MCP Integration](#mcp-integration) below.
+Use the MCP config printed by the SDK to connect your IDE. See [MCP Integration](#mcp-integration) below.
 
 ## MCP Integration
 
@@ -112,7 +112,7 @@ claude mcp add knowstack \
 
 | Script                    | Description                                   |
 | ------------------------- | --------------------------------------------- |
-| `pnpm setup:seed`         | Interactive setup wizard (org, project, docs) |
+| `npx @knowstack/sdk --init` | Interactive setup wizard (org, project, docs) |
 | `pnpm start:dev`          | Start development server with hot reload      |
 | `pnpm start:debug`        | Start with debugger attached                  |
 | `pnpm build`              | Build for production                          |
@@ -140,7 +140,7 @@ Contributions are welcome! Please read our [Contributing Guide](CONTRIBUTING.md)
 
 ## Security
 
-To report a security vulnerability, please open a [private issue on GitHub](https://github.com/knowstack-dev/knowstack/issues). See [SECURITY.md](SECURITY.md) for details.
+To report a security vulnerability, please open a [private issue on GitHub](https://github.com/wellitongervickas/knowstack/issues). See [SECURITY.md](SECURITY.md) for details.
 
 ## License
 

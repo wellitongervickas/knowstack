@@ -13,6 +13,7 @@ import { ObservabilityModule } from '@/infrastructure/observability/observabilit
 import { CacheModule } from '@/infrastructure/cache/cache.module';
 import { AuditModule } from '@/application/audit/audit.module';
 import { McpModule } from '@/presentation/mcp/mcp.module';
+import { McpAdminModule } from '@/presentation/mcp/mcp-admin.module';
 
 // Middleware
 import { RequestContextMiddleware } from '@/common/middleware/request-context.middleware';
@@ -51,6 +52,9 @@ import { GlobalExceptionFilter } from '@/common/filters/global-exception.filter'
 
     // MCP Module — sole presentation layer
     McpModule,
+
+    // MCP Admin Module — org/project management (no tenant middleware)
+    McpAdminModule,
   ],
   providers: [
     // Global Logging Interceptor

@@ -1,5 +1,5 @@
-import { logSuccess, logStep } from '@/scripts/setup/prompts';
-import { SetupResult } from '@/scripts/setup/types';
+import { logSuccess, logStep } from '../prompts';
+import { SetupResult } from '../types';
 
 export function printSummary(result: SetupResult): void {
   const { orgSlug, projectSlug, mcpUrl, contextProjects, embeddings } = result;

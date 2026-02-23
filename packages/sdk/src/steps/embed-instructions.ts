@@ -1,21 +1,20 @@
-import { createSpinner } from '@/scripts/setup/prompts';
-import { callMcpTool } from '@/scripts/setup/mcp-client';
-import type { EmbedResult } from '@/scripts/setup/types';
+import { createSpinner } from '../prompts';
+import { callMcpTool } from '../mcp-client';
+import type { EmbedResult } from '../types';
 
 /**
- * Backfill embeddings for all ingested documents via MCP.
- * Runs after ingest-documents to ensure all documents have vector embeddings.
+ * Backfill embeddings for all seeded instructions via MCP.
  * Non-blocking: warns on failure but does not throw.
  */
-export async function embedDocuments(
+export async function embedInstructions(
   mcpUrl: string,
   headers: Record<string, string>,
 ): Promise<EmbedResult | null> {
   const spinner = createSpinner();
-  spinner.start('Generating document embeddings...');
+  spinner.start('Generating instruction embeddings...');
 
   try {
-    const result = (await callMcpTool(mcpUrl, headers, 'knowstack.backfill_embeddings', {
+    const result = (await callMcpTool(mcpUrl, headers, 'knowstack.backfill_instructions', {
       force: false,
     })) as unknown as EmbedResult;
 
@@ -25,12 +24,12 @@ export async function embedDocuments(
     if (result.failed > 0) parts.push(`${result.failed} failed`);
 
     spinner.stop(
-      `Doc embeddings: ${parts.join(', ')} (${result.total} total, ${result.durationMs}ms)`,
+      `Instruction embeddings: ${parts.join(', ')} (${result.total} total, ${result.durationMs}ms)`,
     );
     return result;
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    spinner.stop(`Doc embeddings: skipped (${message})`);
+    spinner.stop(`Instruction embeddings: skipped (${message})`);
     return null;
   }
 }

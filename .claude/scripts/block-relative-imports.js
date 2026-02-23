@@ -16,6 +16,9 @@ process.stdin.on('end', () => {
   // Skip prisma/ internals (allowed exception)
   if (/prisma[/\\]/.test(filePath)) process.exit(0);
 
+  // Skip packages/ — standalone packages use relative imports (no @/ alias)
+  if (/packages[/\\]/.test(filePath)) process.exit(0);
+
   // Check each line for relative imports crossing boundaries
   const lines = content.split('\n');
   for (const line of lines) {

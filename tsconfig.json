@@ -20,10 +20,9 @@
     "noFallthroughCasesInSwitch": true,
     "paths": {
       "@/*": ["src/*"],
-      "@/tests/*": ["test/*"],
-      "@/scripts/*": ["scripts/*"]
+      "@/tests/*": ["test/*"]
     }
   },
-  "include": ["src/**/*", "prisma/**/*", "test/**/*", "scripts/**/*"],
+  "include": ["src/**/*", "prisma/**/*", "test/**/*"],
   "exclude": ["node_modules", "dist"]
 }

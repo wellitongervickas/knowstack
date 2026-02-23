@@ -1,25 +1,20 @@
 import * as fs from 'node:fs';
 import * as path from 'node:path';
-import { CONFIG_FILE_NAME } from '@/scripts/setup/constants';
-import { SetupConfig } from '@/scripts/setup/types';
-import { askSelect } from '@/scripts/setup/prompts';
+import { CONFIG_FILE_NAME } from './constants';
+import { SetupConfig } from './types';
+import { askSelect } from './prompts';
 
 const CONFIG_PATH = path.resolve(CONFIG_FILE_NAME);
 
 /**
- * Load all profiles from knowstack.config.ts.
+ * Load all profiles from knowstack.config.json.
  * Returns empty object if the file doesn't exist.
  */
 export function loadProfiles(): Record<string, SetupConfig> {
   try {
     if (!fs.existsSync(CONFIG_PATH)) return {};
-
-    // Clear require cache so re-reads pick up changes
-    delete require.cache[require.resolve(CONFIG_PATH)];
-
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const mod = require(CONFIG_PATH);
-    return (mod.default ?? mod) as Record<string, SetupConfig>;
+    const content = fs.readFileSync(CONFIG_PATH, 'utf-8');
+    return JSON.parse(content) as Record<string, SetupConfig>;
   } catch {
     return {};
   }
@@ -27,10 +22,6 @@ export function loadProfiles(): Record<string, SetupConfig> {
 
 /**
  * Select a profile by name or prompt the user.
- * - If --profile specified, use that (create empty if not found)
- * - If only one profile, use it
- * - If multiple, prompt
- * - If none, create a default "local" profile
  */
 export async function selectProfile(
   profiles: Record<string, SetupConfig>,
@@ -66,22 +57,9 @@ export async function selectProfile(
 }
 
 /**
- * Save all profiles to knowstack.config.ts.
+ * Save all profiles to knowstack.config.json.
  */
 export function saveProfiles(profiles: Record<string, SetupConfig>): void {
-  const json = JSON.stringify(profiles, null, 2);
-  const content = `export default ${json} as const;\n`;
+  const content = JSON.stringify(profiles, null, 2) + '\n';
   fs.writeFileSync(CONFIG_PATH, content, 'utf-8');
-}
-
-/**
- * Parse --profile flag from process.argv.
- */
-export function parseProfileArg(): string | undefined {
-  const args = process.argv.slice(2);
-  const idx = args.indexOf('--profile');
-  if (idx !== -1 && idx + 1 < args.length) {
-    return args[idx + 1];
-  }
-  return undefined;
 }

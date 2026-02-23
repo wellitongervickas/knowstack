@@ -12,13 +12,14 @@ RUN apt-get update -y && apt-get install -y openssl && rm -rf /var/lib/apt/lists
 
 WORKDIR /app
 
-# Copy package files
-COPY package.json pnpm-lock.yaml ./
+# Copy package files (workspace root + all workspace package.json files)
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY packages/sdk/package.json ./packages/sdk/
 
 # Install dependencies
 RUN pnpm install --frozen-lockfile
 
-# Copy source code
+# Copy source code (SDK source not needed for API image)
 COPY . .
 
 # Generate Prisma client (needed for TypeScript compilation)
@@ -36,4 +37,4 @@ USER nestjs
 EXPOSE 3000
 
 # Start the application
-CMD ["node", "dist/src/main.js"]
+CMD ["node", "dist/main.js"]

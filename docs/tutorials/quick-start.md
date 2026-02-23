@@ -40,16 +40,6 @@ pnpm prisma generate
 pnpm prisma migrate dev
 ```
 
-## Seed Data
-
-The setup wizard creates your organization, project, and ingests documentation directly into the database. No server required.
-
-```bash
-pnpm setup:seed
-```
-
-Follow the interactive prompts to create your org/project and ingest docs. The wizard prints MCP connection config at the end.
-
 ## Start the Server
 
 ```bash
@@ -58,9 +48,19 @@ pnpm start:dev
 
 The server runs at `http://localhost:3000`.
 
+## Seed Data
+
+With the server running, use the SDK CLI to create your organization, project, ingest documentation, and seed instructions:
+
+```bash
+npx @knowstack/sdk --init
+```
+
+Follow the interactive prompts. The CLI prints MCP connection config at the end. See [SDK Setup Guide](../guides/sdk-setup.md) for full options.
+
 ## Connect via MCP
 
-Use the config printed by the setup wizard to connect any MCP-compatible tool. Example for a CLI tool:
+Use the config printed by the SDK to connect any MCP-compatible tool. Example for a CLI tool:
 
 ```bash
 # Example: Claude Code (adapt for your MCP client)
@@ -76,7 +76,7 @@ For IDE-based clients, see [MCP Reference — Client Configuration](../reference
 
 | Script               | Description           |
 | -------------------- | --------------------- |
-| `pnpm setup:seed`    | Seed org, project, docs |
+| `npx @knowstack/sdk --init` | Setup org, project, docs |
 | `pnpm start:dev`     | Start with hot reload |
 | `pnpm build`         | Build for production  |
 | `pnpm prisma studio` | Open database GUI     |

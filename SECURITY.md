@@ -4,7 +4,7 @@
 
 **Please do NOT report security vulnerabilities through public GitHub issues.**
 
-Instead, open a [private issue on GitHub](https://github.com/knowstack-dev/knowstack/issues) and clearly mark it as a security vulnerability. This ensures that security issues are handled confidentially before public disclosure.
+Instead, open a [private issue on GitHub](https://github.com/wellitongervickas/knowstack/issues) and clearly mark it as a security vulnerability. This ensures that security issues are handled confidentially before public disclosure.
 
 When reporting, please include:
 

@@ -1,0 +1,35 @@
+{
+  "name": "@knowstack/sdk",
+  "version": "0.1.1",
+  "description": "CLI toolkit for KnowStack project setup and management",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wellitongervickas/knowstack.git",
+    "directory": "packages/sdk"
+  },
+  "bin": {
+    "knowstack": "dist/index.js"
+  },
+  "main": "./dist/cli.js",
+  "types": "./dist/cli.d.ts",
+  "files": [
+    "dist/"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "dev": "tsc -p tsconfig.build.json --watch",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist",
+    "release": "pnpm run clean && pnpm run build && npm publish --access public"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "@clack/prompts": "^1.0.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  }
+}

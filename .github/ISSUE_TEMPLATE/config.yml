@@ -1,8 +1,8 @@
 blank_issues_enabled: true
 contact_links:
   - name: Documentation
-    url: https://github.com/knowstack-dev/knowstack/tree/main/docs
+    url: https://github.com/wellitongervickas/knowstack/tree/main/docs
     about: Browse the project documentation before opening an issue
   - name: Security Vulnerability
-    url: https://github.com/knowstack-dev/knowstack/issues
+    url: https://github.com/wellitongervickas/knowstack/issues
     about: Report security vulnerabilities by opening a private issue

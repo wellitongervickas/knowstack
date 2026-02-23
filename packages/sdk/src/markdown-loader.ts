@@ -1,6 +1,6 @@
 import * as fs from 'node:fs';
 import * as path from 'node:path';
-import { DocumentFile } from '@/scripts/setup/types';
+import { DocumentFile } from './types';
 
 export function loadMarkdownFiles(docsDir: string): DocumentFile[] {
   const absoluteDir = path.resolve(docsDir);

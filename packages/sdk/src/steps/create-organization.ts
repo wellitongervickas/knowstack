@@ -1,8 +1,7 @@
-import { PrismaClient } from '@prisma/client';
-import { askText, askSelect, logStep } from '@/scripts/setup/prompts';
-import { DEFAULT_ORG_NAME, DEFAULT_ORG_SLUG } from '@/scripts/setup/constants';
-import { slugify } from '@/scripts/setup/utils';
-import { SetupConfig } from '@/scripts/setup/types';
+import { askText, askSelect, logStep } from '../prompts';
+import { slugify } from '../utils';
+import { callMcpTool } from '../mcp-client';
+import { SetupConfig } from '../types';
 
 interface OrgResult {
   id: string;
@@ -10,15 +9,25 @@ interface OrgResult {
   slug: string;
 }
 
+/**
+ * Derive the admin MCP URL from the base MCP URL.
+ * e.g., http://localhost:3000/api/v1/mcp → http://localhost:3000/api/v1/mcp/admin
+ */
+function getAdminUrl(mcpUrl: string): string {
+  return mcpUrl.replace(/\/?$/, '/admin');
+}
+
 export async function createOrganization(
-  prisma: PrismaClient,
+  mcpUrl: string,
   config: SetupConfig,
 ): Promise<OrgResult> {
-  const existing = await prisma.organization.findMany({
-    orderBy: { createdAt: 'desc' },
-  });
+  const adminUrl = getAdminUrl(mcpUrl);
 
-  if (existing.length > 0) {
+  // Fetch existing organizations via admin MCP
+  const existingResponse = await callMcpTool(adminUrl, {}, 'knowstack.list_organizations', {});
+  const existing = existingResponse as unknown as OrgResult[];
+
+  if (Array.isArray(existing) && existing.length > 0) {
     // If config has a slug, try to auto-select the matching org
     if (config.orgSlug) {
       const match = existing.find((o) => o.slug === config.orgSlug);
@@ -43,13 +52,11 @@ export async function createOrganization(
     }
   }
 
-  const defaultName = config.orgSlug ? undefined : DEFAULT_ORG_NAME;
   const name = await askText('Organization name', {
-    defaultValue: defaultName ?? DEFAULT_ORG_NAME,
-    placeholder: defaultName ?? DEFAULT_ORG_NAME,
+    placeholder: 'My Organization',
   });
 
-  const suggestedSlug = config.orgSlug ?? (slugify(name) || DEFAULT_ORG_SLUG);
+  const suggestedSlug = config.orgSlug ?? slugify(name);
   const slug = await askText('Organization slug', {
     defaultValue: suggestedSlug,
     placeholder: suggestedSlug,
@@ -60,11 +67,21 @@ export async function createOrganization(
     },
   });
 
-  const org = await prisma.organization.upsert({
-    where: { slug },
-    create: { name, slug },
-    update: { name },
-  });
+  // Try to get existing org by slug first (upsert-like behavior)
+  try {
+    const existingOrg = (await callMcpTool(adminUrl, {}, 'knowstack.get_organization', {
+      slug,
+    })) as unknown as OrgResult;
+    logStep(`Organization ready: ${existingOrg.name} (${existingOrg.slug})`);
+    return { id: existingOrg.id, name: existingOrg.name, slug: existingOrg.slug };
+  } catch {
+    // Not found — create new
+  }
+
+  const org = (await callMcpTool(adminUrl, {}, 'knowstack.create_organization', {
+    name,
+    slug,
+  })) as unknown as OrgResult;
 
   logStep(`Organization ready: ${org.name} (${org.slug})`);
   return { id: org.id, name: org.name, slug: org.slug };

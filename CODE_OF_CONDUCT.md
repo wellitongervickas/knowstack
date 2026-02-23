@@ -18,7 +18,7 @@ We expect all participants to:
 
 ## Enforcement
 
-Instances of unacceptable behavior may be reported through a [private GitHub issue](https://github.com/knowstack-dev/knowstack/issues) or by contacting the project maintainers directly. Please mark security-related issues as confidential.
+Instances of unacceptable behavior may be reported through a [private GitHub issue](https://github.com/wellitongervickas/knowstack/issues) or by contacting the project maintainers directly. Please mark security-related issues as confidential.
 
 All complaints will be reviewed and investigated promptly and fairly. Project maintainers are obligated to maintain confidentiality with regard to the reporter of an incident.
 

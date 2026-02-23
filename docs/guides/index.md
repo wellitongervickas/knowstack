@@ -4,6 +4,10 @@
 
 Task-oriented how-to guides for practitioners. Each guide solves a specific problem.
 
+## Project Setup
+
+- [SDK Setup](sdk-setup.md) - Set up a KnowStack project using the SDK CLI
+
 ## Embeddings & Semantic Search
 
 - [Backfill Embeddings](backfill-embeddings.md) - Add embeddings to existing documents

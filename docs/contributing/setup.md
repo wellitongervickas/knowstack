@@ -17,7 +17,7 @@ Set up your local development environment for KnowStack.
 
 ```bash
 # Clone the repository
-git clone https://github.com/knowstack-dev/knowstack.git
+git clone https://github.com/wellitongervickas/knowstack.git
 cd knowstack
 
 # Install dependencies
@@ -33,14 +33,19 @@ cp .env.example .env
 pnpm prisma generate
 pnpm prisma migrate dev
 
-# Seed data (org, project, docs, instructions)
-pnpm setup:seed
-
 # Start development server
 pnpm start:dev
 ```
 
 The server runs at `http://localhost:3000`.
+
+With the server running, seed data using the SDK CLI:
+
+```bash
+npx @knowstack/sdk --init
+```
+
+See [SDK Setup Guide](../guides/sdk-setup.md) for full options.
 
 ---
 
@@ -106,21 +111,24 @@ pnpm prisma migrate reset --force
 pnpm prisma studio
 ```
 
-### Setup Script
+### SDK CLI
 
-The setup script seeds data directly into the database (no server required):
+The SDK CLI connects to the running server via MCP to seed data:
 
 ```bash
-pnpm setup:seed
+npx @knowstack/sdk --init
 ```
 
-The setup script walks you through:
+The CLI walks you through:
 
 1. Organization creation (or reuses existing by slug)
 2. Project creation (or reuses existing by slug)
-3. Document ingestion from `./docs`
+3. Document ingestion from a local directory
 4. Instruction seeding (agents, skills, commands, templates)
-5. MCP connection config output
+5. Embedding generation
+6. MCP connection config output
+
+See [SDK Setup Guide](../guides/sdk-setup.md) for full details.
 
 ---
 

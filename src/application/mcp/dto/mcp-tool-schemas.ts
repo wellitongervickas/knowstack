@@ -193,6 +193,45 @@ export const SearchInstructionsToolParams = {
 };
 
 // =============================================================================
+// ADMIN — Organizations & Projects
+// =============================================================================
+
+/** Reusable slug parameter: lowercase letters, numbers, hyphens. */
+const slugParam = z
+  .string()
+  .min(1)
+  .max(100)
+  .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/);
+
+const nameParam = z.string().min(1).max(255);
+
+export const CreateOrganizationToolParams = {
+  name: nameParam.describe('Organization display name'),
+  slug: slugParam.describe('URL-safe unique identifier for the organization'),
+};
+
+export const GetOrganizationToolParams = {
+  slug: slugParam.describe('Organization slug to look up'),
+};
+
+export const ListOrganizationsToolParams = {};
+
+export const CreateProjectToolParams = {
+  organizationSlug: slugParam.describe('Slug of the parent organization'),
+  name: nameParam.describe('Project display name'),
+  slug: slugParam.describe('URL-safe unique identifier for the project (unique within org)'),
+};
+
+export const GetProjectToolParams = {
+  organizationSlug: slugParam.describe('Slug of the parent organization'),
+  slug: slugParam.describe('Project slug to look up'),
+};
+
+export const ListProjectsToolParams = {
+  organizationSlug: slugParam.describe('Slug of the organization to list projects for'),
+};
+
+// =============================================================================
 // BACKFILL
 // =============================================================================
 

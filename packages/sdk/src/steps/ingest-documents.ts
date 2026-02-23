@@ -1,8 +1,8 @@
-import { askText, createSpinner, logStep } from '@/scripts/setup/prompts';
-import { DEFAULT_DOCS_DIR } from '@/scripts/setup/constants';
-import { loadMarkdownFiles } from '@/scripts/setup/markdown-loader';
-import { callMcpTool } from '@/scripts/setup/mcp-client';
-import { IngestResult, IngestSummary, SetupConfig } from '@/scripts/setup/types';
+import { askText, createSpinner, logStep } from '../prompts';
+import { DEFAULT_DOCS_DIR } from '../constants';
+import { loadMarkdownFiles } from '../markdown-loader';
+import { callMcpTool } from '../mcp-client';
+import { IngestResult, IngestSummary, SetupConfig } from '../types';
 
 export async function ingestDocuments(
   mcpUrl: string,

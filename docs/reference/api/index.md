@@ -33,6 +33,15 @@ Tenant context is provided via HTTP headers on every request:
 
 The MCP endpoint provides all document, instruction, query, and memory tools. See [MCP Reference](mcp.md) for the full tool catalog.
 
+### [Admin MCP](admin-mcp.md)
+
+| Method | Path         | Description                          |
+| ------ | ------------ | ------------------------------------ |
+| POST   | `/mcp/admin` | Admin MCP JSON-RPC endpoint          |
+| GET    | `/mcp/admin` | Admin MCP SSE endpoint               |
+
+The Admin MCP endpoint provides organization and project management tools. No tenant headers required. See [Admin MCP Reference](admin-mcp.md) for details.
+
 ---
 
 ## See Also
@@ -40,3 +49,4 @@ The MCP endpoint provides all document, instruction, query, and memory tools. Se
 - [Common Headers](../integrations/common-headers.md) - Request/response headers
 - [Error Handling](../troubleshooting/errors.md) - Error codes and handling
 - [MCP Reference](mcp.md) - Full MCP tool documentation
+- [Admin MCP Reference](admin-mcp.md) - Organization and project management

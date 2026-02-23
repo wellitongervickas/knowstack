@@ -35,6 +35,7 @@ export interface IMcpServerFactory {
 }
 
 export const MCP_SERVER_FACTORY = Symbol('MCP_SERVER_FACTORY');
+export const MCP_ADMIN_SERVER_FACTORY = Symbol('MCP_ADMIN_SERVER_FACTORY');
 
 /**
  * MCP tool result shape returned to the SDK.

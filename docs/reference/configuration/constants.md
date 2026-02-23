@@ -165,6 +165,17 @@ Constants are organized by scope:
 | `MCP_TOOL_BACKFILL_INSTRUCTIONS` | `'knowstack.backfill_instructions'` | Backfill instruction embeddings tool name |
 | `MCP_TOOL_BACKFILL_EMBEDDINGS` | `'knowstack.backfill_embeddings'` | Backfill document embeddings tool name |
 
+**Admin tools** (registered on `/mcp/admin`, no tenant context):
+
+| Constant | Value | Description |
+|----------|-------|-------------|
+| `MCP_TOOL_CREATE_ORGANIZATION` | `'knowstack.create_organization'` | Create organization tool name |
+| `MCP_TOOL_GET_ORGANIZATION` | `'knowstack.get_organization'` | Get organization tool name |
+| `MCP_TOOL_LIST_ORGANIZATIONS` | `'knowstack.list_organizations'` | List organizations tool name |
+| `MCP_TOOL_CREATE_PROJECT` | `'knowstack.create_project'` | Create project tool name |
+| `MCP_TOOL_GET_PROJECT` | `'knowstack.get_project'` | Get project tool name |
+| `MCP_TOOL_LIST_PROJECTS` | `'knowstack.list_projects'` | List projects tool name |
+
 ### Security (`@/application/security/security.constants`)
 
 #### Headers
