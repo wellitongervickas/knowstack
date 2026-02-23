@@ -66,7 +66,7 @@ Presentation → Application → Core ← Infrastructure
 ┌─────────────────────────────────────────────────────────────────────┐
 │                           CORE LAYER                                │
 │  Entities: Organization, Project, Document, DocumentEmbedding,      │
-│            Instruction, AuditLog                                    │
+│            Instruction, InstructionEmbedding, AuditLog              │
 │  Interfaces: Repository + Service contracts, MCP interfaces         │
 │  Exceptions: Domain-specific errors                                 │
 └─────────────────────────────────────────────────────────────────────┘
@@ -92,6 +92,7 @@ src/
 │   │   ├── document.entity.ts
 │   │   ├── document-embedding.entity.ts
 │   │   ├── instruction.entity.ts
+│   │   ├── instruction-embedding.entity.ts
 │   │   └── audit-log.entity.ts
 │   ├── interfaces/         # Repository & service contracts
 │   │   ├── config/         # KnowStack config interfaces
@@ -119,7 +120,8 @@ src/
 │   ├── security/           # Security constants
 │   └── embedding/          # Semantic search
 │       ├── dto/
-│       └── services/       # DocumentEmbeddingService, SemanticSearchService, EmbeddingBackfillService
+│       └── services/       # DocumentEmbeddingService, SemanticSearchService, EmbeddingBackfillService,
+│                          # InstructionEmbeddingService, InstructionBackfillService, InstructionSearchService
 │
 ├── infrastructure/         # External implementations
 │   ├── ai/                 # AI provider implementations
@@ -247,8 +249,11 @@ Organization (tenant)
   │   ├── Document
   │   │   (MANUAL/URL)
   │   │   └── DocumentEmbedding (optional, 1:1)
-  │   └── Instruction
-  │       (AGENT/COMMAND/MEMORY/SKILL/TEMPLATE)
+  │   └── Instruction (PRIVATE visibility)
+  │       └── InstructionEmbedding (optional, 1:1)
+  │
+  ├── Instruction (ORGANIZATION/PUBLIC visibility)
+  │   └── InstructionEmbedding (optional, 1:1)
   │
   └── AuditLog (immutable trail)
 ```
@@ -262,6 +267,7 @@ Organization (tenant)
 | **Document**          | Knowledge     | title, content, sourceType, contentHash        |
 | **DocumentEmbedding** | Vectors       | documentId, embedding, contentHash, model      |
 | **Instruction**       | AI instruct.  | name, type, visibility, content, projectId     |
+| **InstructionEmbedding** | Vectors    | instructionId, embedding, contentHash, model   |
 | **AuditLog**          | Audit trail   | action, category, organizationId, projectId    |
 
 ### Database Constraints
@@ -370,24 +376,27 @@ See [Semantic Retrieval](../concepts/semantic-retrieval.md) for detailed archite
 ### HTTP Endpoints
 
 ```
-GET  /health                    Health check
-GET  /metrics                   Prometheus metrics
-POST /mcp                       MCP protocol handler (SSE transport)
-GET  /mcp                       MCP protocol handler (read operations)
+GET    /metrics                 Prometheus metrics
+POST   /mcp                     MCP protocol handler
+GET    /mcp                     MCP protocol handler (read operations)
+DELETE /mcp                     Returns 405 (stateless, no sessions)
 ```
 
 ### MCP Tools
 
 All business operations are exposed as MCP tools via the `/mcp` endpoint:
 
-- **knowstack_query** - AI-powered documentation query
-- **knowstack_save_documents** - Save/update documents
-- **knowstack_get_documents** - List, search, or get documents by ID
-- **knowstack_delete_documents** - Delete a document
-- **knowstack_save_agents/commands/skills/templates/memory** - Save instruction types
-- **knowstack_get_agents/commands/skills/templates/memory** - Get instruction types
-- **knowstack_delete_agents/commands/skills/templates/memory** - Delete instruction types
-- **knowstack_search_instructions** - Search across instruction types
+- **knowstack.query** - AI-powered documentation query
+- **knowstack.save_documents** - Save/update documents
+- **knowstack.get_documents** - List, search, or get documents by ID
+- **knowstack.delete_documents** - Delete a document
+- **knowstack.save_agents/commands/skills/templates/memory** - Save instruction types
+- **knowstack.get_agents/commands/skills/templates/memory** - Get instruction types
+- **knowstack.delete_agents/commands/skills/templates/memory** - Delete instruction types
+- **knowstack.update_memory** - Update memory entry with str_replace semantics
+- **knowstack.search_instructions** - Search across instruction types
+- **knowstack.backfill_instructions** - Backfill instruction embeddings
+- **knowstack.backfill_embeddings** - Backfill document embeddings
 
 Tenant context is provided via `x-ks-org` and `x-ks-project` headers on every request.
 
@@ -434,12 +443,12 @@ services:
 
 | Metric                | Count |
 | --------------------- | ----- |
-| Domain Entities       | 6     |
+| Domain Entities       | 7     |
 | Repository Interfaces | 6+    |
 | Service Interfaces    | 5+    |
-| Custom Exceptions     | 10+   |
-| MCP Tools             | 21    |
-| HTTP Endpoints        | 3     |
+| Custom Exceptions     | 15    |
+| MCP Tools             | 23    |
+| HTTP Endpoints        | 2     |
 | Unit Tests            | 100+  |
 
 ---

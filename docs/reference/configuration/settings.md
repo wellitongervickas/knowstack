@@ -20,7 +20,7 @@ All settings are defined in `@/app.settings` and can be overridden via `.env` fi
 
 | Setting        | Env Variable   | Default              | Description               |
 | -------------- | -------------- | -------------------- | ------------------------- |
-| `DATABASE_URL` | `DATABASE_URL` | `'postgresql://...'` | PostgreSQL connection URL |
+| `DATABASE_URL` | `DATABASE_URL` | `'postgresql://postgres:postgres@localhost:5432/knowstack'` | PostgreSQL connection URL |
 
 ## Redis
 
@@ -49,6 +49,8 @@ All settings are defined in `@/app.settings` and can be overridden via `.env` fi
 | `OPENAI_EMBEDDING_MODEL`         | `OPENAI_EMBEDDING_MODEL`         | `'text-embedding-3-small'` | OpenAI embedding model         |
 | `EMBEDDING_TOP_K`                | `EMBEDDING_TOP_K`                | `10`                       | Top-K for semantic search      |
 | `EMBEDDING_HYBRID_WEIGHT`        | `EMBEDDING_HYBRID_WEIGHT`        | `0.7`                      | Semantic vs keyword weight     |
+| `EMBEDDING_MIN_SCORE`            | `EMBEDDING_MIN_SCORE`            | `0.35`                     | Minimum similarity score       |
+| `EMBEDDING_SIMILARITY_FLOOR`     | `EMBEDDING_SIMILARITY_FLOOR`     | `0.3`                      | Similarity floor for filtering |
 | `EMBEDDING_RATE_LIMIT_PER_MINUTE`| `EMBEDDING_RATE_LIMIT_PER_MINUTE`| `60`                       | Rate limit per minute          |
 | `EMBEDDING_MAX_BATCH_SIZE`       | `EMBEDDING_MAX_BATCH_SIZE`       | `100`                      | Max backfill batch size        |
 

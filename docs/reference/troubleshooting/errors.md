@@ -26,11 +26,13 @@ All errors return a consistent JSON format with request correlation.
 
 ### Tenant Resolution Errors (4xx)
 
+Thrown by `ConfigTenantMiddleware` as NestJS `BadRequestException` (not domain exceptions).
+
 | Code                     | HTTP Status | Description                                      |
 | ------------------------ | ----------- | ------------------------------------------------ |
 | `MISSING_TENANT_HEADER`  | 400         | Required `x-ks-org` or `x-ks-project` header missing |
-| `ORGANIZATION_NOT_FOUND` | 404         | Organization slug not found                      |
-| `PROJECT_NOT_FOUND`      | 404         | Project slug not found in organization           |
+| `ORGANIZATION_NOT_FOUND` | 400         | Organization slug not found                      |
+| `PROJECT_NOT_FOUND`      | 400         | Project slug not found in organization           |
 
 ### Validation Errors (4xx)
 
@@ -38,6 +40,34 @@ All errors return a consistent JSON format with request correlation.
 | ------------------ | ----------- | -------------------- |
 | `VALIDATION_ERROR` | 400         | Invalid request body |
 | `NOT_FOUND`        | 404         | Resource not found   |
+
+### Document Domain Errors (4xx)
+
+| Code                 | HTTP Status | Description                        |
+| -------------------- | ----------- | ---------------------------------- |
+| `DOCUMENT_NOT_FOUND` | 404         | Document ID does not exist in project |
+
+### Instruction Domain Errors (4xx/5xx)
+
+| Code                                | HTTP Status | Description                                 |
+| ----------------------------------- | ----------- | ------------------------------------------- |
+| `INSTRUCTION_NOT_FOUND`             | 404         | Instruction not found by name/type          |
+| `INSTRUCTION_DUPLICATE`             | 409         | Instruction with same name/type already exists |
+| `INSTRUCTION_VISIBILITY_FORBIDDEN`  | 403         | Cannot set PUBLIC visibility via API        |
+| `MEMORY_ENTRY_NOT_FOUND`            | 404         | Memory entry not found by name              |
+| `MEMORY_CONTENT_REPLACE_ERROR`      | 400         | str_replace: `old_str` not found or ambiguous |
+
+### Embedding Domain Errors (5xx)
+
+| Code                               | HTTP Status | Description                                |
+| ---------------------------------- | ----------- | ------------------------------------------ |
+| `EMBEDDING_API_ERROR`              | 500         | Embedding provider API call failed         |
+| `EMBEDDING_NOT_CONFIGURED`         | 500         | Embedding provider not configured          |
+| `EMBEDDING_RATE_LIMITED`           | 500         | Embedding API rate limit exceeded          |
+| `EMBEDDING_TOKEN_LIMIT_EXCEEDED`   | 500         | Input exceeds model token limit            |
+| `EMBEDDING_DISABLED`               | 500         | Embedding feature is disabled              |
+| `VECTOR_SEARCH_FAILED`            | 500         | Vector similarity search failed            |
+| `PGVECTOR_NOT_INSTALLED`          | 500         | pgvector PostgreSQL extension not installed |
 
 ### Server Errors (5xx)
 
@@ -71,6 +101,50 @@ All errors return a consistent JSON format with request correlation.
   }
 }
 ```
+
+## MCP Tool Error Pattern
+
+MCP tools return errors within a successful JSON-RPC response using the `isError: true` flag. These are **not** HTTP errors — the HTTP status is always `200 OK`.
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": {
+    "content": [{ "type": "text", "text": "Document not found" }],
+    "isError": true
+  }
+}
+```
+
+Common MCP tool error scenarios:
+
+| Tool | Error | Description |
+| ---- | ----- | ----------- |
+| `get_documents` | Document not found | Document ID does not exist |
+| `save_documents` | Missing content/URL | Neither `content` nor `sourceUrl` provided |
+| `delete_agents/commands/skills/templates` | Instruction not found | Instruction name does not exist |
+| `update_memory` | Entry not found | Memory entry name does not exist |
+| `update_memory` | Replace error | `old_str` not found or matches multiple times |
+| `backfill_instructions` | Embeddings disabled | `EMBEDDING_ENABLED=false` |
+| `backfill_embeddings` | Embeddings disabled | `EMBEDDING_ENABLED=false` |
+| `query` | Query failed | AI provider or context builder error |
+
+## HTTP Status Mapping
+
+The `GlobalExceptionFilter` maps domain exception codes to HTTP status codes:
+
+| HTTP Status | Domain Codes |
+| ----------- | ------------ |
+| **400** | `VALIDATION_ERROR` |
+| **401** | `INVALID_API_KEY`, `MISSING_API_KEY`, `API_KEY_REVOKED`, `API_KEY_EXPIRED`, `MISSING_AUTH`, `TOKEN_EXPIRED`, `INVALID_TOKEN`, `SESSION_INVALID`, `INVALID_CREDENTIALS`, `SESSION_EXPIRED`, `SESSION_REVOKED` |
+| **403** | `FORBIDDEN`, `MCP_SCOPE_INSUFFICIENT`, `CANNOT_REVOKE_KEY`, `NO_PROJECT_ACCESS` |
+| **404** | `NOT_FOUND`, `API_KEY_NOT_FOUND`, `DOCUMENT_NOT_FOUND`, `PROJECT_NOT_FOUND`, `ORGANIZATION_NOT_FOUND`, `MEMBERSHIP_NOT_FOUND` |
+| **500** | All unmapped codes (default) |
+
+> **Note:** Tenant resolution errors (`MISSING_TENANT_HEADER`, `ORGANIZATION_NOT_FOUND`, `PROJECT_NOT_FOUND`) are thrown as NestJS `BadRequestException` by `ConfigTenantMiddleware` before the filter is reached — they always return HTTP 400.
+
+> **Note:** Embedding exceptions (`EMBEDDING_API_ERROR`, etc.) are not mapped in the filter — they surface as HTTP 500. In MCP context, they are caught by the tool handler and returned as `isError: true` responses.
 
 ## Handling Errors
 

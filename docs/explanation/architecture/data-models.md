@@ -55,9 +55,11 @@ Organization (tenant)
   │   ├── Document
   │   │   (MANUAL/URL)
   │   │   └── DocumentEmbedding (optional, 1:1)
-  │   └── Instruction
-  │       (AGENT/COMMAND/MEMORY/SKILL/TEMPLATE)
+  │   └── Instruction (PRIVATE visibility)
   │       └── InstructionEmbedding (optional, 1:1)
+  │
+  ├── Instruction (ORGANIZATION/PUBLIC visibility)
+  │   └── InstructionEmbedding (optional, 1:1)
   │
   └── AuditLog (immutable trail)
 ```
@@ -81,6 +83,11 @@ Top-level tenant container.
 **Constraints:**
 
 - `slug` is unique across all organizations
+
+**Relationships:**
+
+- Has many `Project` (1:N)
+- Has many `Instruction` where visibility is ORGANIZATION or PUBLIC (1:N)
 
 ---
 
@@ -163,22 +170,29 @@ Vector embedding for semantic search.
 
 AI instruction configuration for projects.
 
-| Field        | Type          | Description                                  |
-| ------------ | ------------- | -------------------------------------------- |
-| `id`         | string (CUID) | Primary key                                  |
-| `projectId`  | string        | FK to Project                                |
-| `name`       | string        | Instruction name                             |
-| `type`       | enum          | AGENT, COMMAND, MEMORY, SKILL, TEMPLATE      |
-| `visibility` | enum          | PUBLIC, ORGANIZATION, PRIVATE                |
-| `content`    | text          | Instruction content (markdown)               |
-| `description`| string?       | Short description                            |
-| `metadata`   | JSON          | Extensible metadata (default: {})            |
-| `createdAt`  | DateTime      | Creation date                                |
-| `updatedAt`  | DateTime      | Last update                                  |
+| Field            | Type          | Description                                  |
+| ---------------- | ------------- | -------------------------------------------- |
+| `id`             | string (CUID) | Primary key                                  |
+| `projectId`      | string?       | FK to Project (null for ORGANIZATION/PUBLIC)  |
+| `organizationId` | string?       | FK to Organization (null for PRIVATE)         |
+| `name`           | string        | Instruction name                             |
+| `type`           | enum          | AGENT, COMMAND, MEMORY, SKILL, TEMPLATE      |
+| `visibility`     | enum          | PUBLIC, ORGANIZATION, PRIVATE                |
+| `content`        | text          | Instruction content (markdown)               |
+| `description`    | string?       | Short description                            |
+| `metadata`       | JSON          | Extensible metadata (default: {})            |
+| `createdAt`      | DateTime      | Creation date                                |
+| `updatedAt`      | DateTime      | Last update                                  |
 
 **Constraints:**
 
 - Unique on `[name, type, projectId]`
+
+**Visibility → ownership mapping:**
+
+- `PRIVATE` → belongs to Project (`projectId` set, `organizationId` null)
+- `ORGANIZATION` → belongs to Organization (`organizationId` set, `projectId` null)
+- `PUBLIC` → belongs to Organization (`organizationId` set, `projectId` null)
 
 **Relationships:**
 
@@ -194,8 +208,8 @@ Vector embedding for instruction semantic search.
 | ---------------- | ------------- | -------------------------------------------------------- |
 | `id`             | string (CUID) | Primary key                                              |
 | `instructionId`  | string        | FK to Instruction (unique)                               |
-| `projectId`      | string?       | Denormalized from Instruction (nullable for PUBLIC)      |
-| `organizationId` | string?       | Denormalized from Instruction (nullable for PUBLIC)      |
+| `projectId`      | string?       | Denormalized from Instruction (null when ORGANIZATION/PUBLIC) |
+| `organizationId` | string?       | Denormalized from Instruction (null when PRIVATE)        |
 | `embedding`      | vector(1536)  | OpenAI text-embedding-3-small vector                     |
 | `contentHash`    | string        | Hash of name+description+content to detect changes       |
 | `model`          | string        | Embedding model used (default: "text-embedding-3-small") |
@@ -226,18 +240,14 @@ Immutable audit trail for security monitoring and forensics.
 | ---------------- | ------------- | ------------------------------------------------ |
 | `id`             | string (CUID) | Primary key                                      |
 | `timestamp`      | DateTime      | When the action occurred (default: now)          |
-| `actorId`        | string?       | Actor identifier (null for system)               |
-| `actorType`      | string        | SYSTEM or MCP                                    |
-| `action`         | string        | Event type from taxonomy                         |
-| `category`       | string        | DOCUMENT, INSTRUCTION, QUERY, ADMIN              |
-| `resourceType`   | string?       | Organization, Project, Document, Instruction     |
+| `action`         | string        | Event type from `AuditAction` taxonomy           |
+| `category`       | string        | DOCUMENT, INSTRUCTION, QUERY, ADMIN, AUDIT       |
+| `resourceType`   | string?       | Organization, Project, Document, Instruction, Query |
 | `resourceId`     | string?       | ID of affected resource                          |
 | `organizationId` | string?       | Organization context                             |
 | `projectId`      | string?       | Project context                                  |
-| `ipAddress`      | string?       | Client IP address                                |
-| `userAgent`      | string?       | Browser/client user agent                        |
 | `requestId`      | string?       | Request correlation ID                           |
-| `source`         | string?       | "api" or "mcp"                                   |
+| `source`         | string?       | `"mcp"` or null                                  |
 | `metadata`       | JSON?         | Structured, sanitized metadata (default: {})     |
 
 ---
@@ -260,6 +270,7 @@ Immutable audit trail for security monitoring and forensics.
 | Parent       | Child             | On Delete             |
 | ------------ | ----------------- | --------------------- |
 | Organization | Project           | CASCADE               |
+| Organization | Instruction       | CASCADE               |
 | Organization | AuditLog          | (no explicit cascade) |
 | Project      | Document          | CASCADE               |
 | Project      | Instruction       | CASCADE               |

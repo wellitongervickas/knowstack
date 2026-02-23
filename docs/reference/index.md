@@ -31,6 +31,15 @@ MCP tools specifications.
 - [Embedding Troubleshooting](troubleshooting/embedding.md) - Error codes and debugging
 - [Error Codes](troubleshooting/errors.md) - API error codes and handling
 
+## Integrations
+
+Code examples for integrating with the KnowStack API.
+
+- [Integration Overview](integrations/index.md) - All integration examples
+- [cURL Examples](integrations/curl.md) - Command-line usage
+- [JavaScript Examples](integrations/javascript.md) - Fetch API, MCP client class
+- [Common Headers](integrations/common-headers.md) - Request/response headers
+
 ---
 
 ## Reference Format

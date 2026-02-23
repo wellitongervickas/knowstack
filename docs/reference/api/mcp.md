@@ -77,7 +77,7 @@ curl -X DELETE http://localhost:3000/api/v1/mcp \
 
 ## Tools Reference
 
-The MCP endpoint provides twenty-two tools organized into nine groups:
+The MCP endpoint provides twenty-three tools organized into ten groups:
 
 | Group | Tools | Description |
 | ----- | ----- | ----------- |
@@ -89,7 +89,7 @@ The MCP endpoint provides twenty-two tools organized into nine groups:
 | **Templates** | `get_templates`, `save_templates`, `delete_templates` | Template instruction management |
 | **Memory** | `get_memory`, `save_memory`, `update_memory`, `delete_memory` | Project-scoped memory entries |
 | **Search** | `search_instructions` | Cross-type instruction discovery (hybrid: vector + keyword) |
-| **Backfill** | `backfill_instructions` | Generate vector embeddings for instructions |
+| **Backfill** | `backfill_instructions`, `backfill_embeddings` | Generate vector embeddings for instructions and documents |
 
 Instruction tools (agents, commands, skills, templates, memory) support 3-tier visibility (`PUBLIC` < `ORGANIZATION` < `PRIVATE`) with optional filtering.
 
@@ -1064,6 +1064,52 @@ Backfill embeddings for instructions. Generates vector embeddings for instructio
       {
         "type": "text",
         "text": "{\"total\":15,\"embedded\":0,\"skipped\":0,\"failed\":0,\"estimatedCostUsd\":0.00009,\"durationMs\":45}"
+      }
+    ]
+  }
+}
+```
+
+---
+
+### knowstack.backfill_embeddings
+
+Backfill embeddings for documents. Generates vector embeddings for documents that are missing or have stale embeddings. Supports dry-run for cost estimation.
+
+**Parameters:**
+
+| Parameter | Type    | Required | Default | Description                                                      |
+| --------- | ------- | -------- | ------- | ---------------------------------------------------------------- |
+| `force`   | boolean | No       | false   | Force regenerate all embeddings (not just missing/stale)          |
+| `dryRun`  | boolean | No       | false   | Estimate cost without generating embeddings                      |
+
+**Example Request:**
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 22,
+  "method": "tools/call",
+  "params": {
+    "name": "knowstack.backfill_embeddings",
+    "arguments": {
+      "dryRun": true
+    }
+  }
+}
+```
+
+**Example Response:**
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 22,
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\"total\":10,\"embedded\":0,\"skipped\":0,\"failed\":0,\"estimatedCostUsd\":0.00005,\"durationMs\":30}"
       }
     ]
   }
